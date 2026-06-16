@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Map, BarChart3, FileText, ShieldAlert, WifiOff } from 'lucide-react';
+import { useCallback, useState, useEffect, useRef } from 'react';
+import { Map, BarChart3, FileText, ShieldAlert } from 'lucide-react';
 
 // Components
 import PermissionScreen from './components/PermissionScreen';
+import LandingScreen from './components/LandingScreen';
 import MapScreen from './components/MapScreen';
 import StatsScreen from './components/StatsScreen';
 import AreaReport from './components/AreaReport';
@@ -48,6 +49,7 @@ const mapConnectionToQuality = (conn) => {
 
 export default function App() {
   // Navigation & Permission state
+  const [hasStarted, setHasStarted] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [activeTab, setActiveTab] = useState('map'); // 'map', 'stats', 'report'
 
@@ -71,6 +73,35 @@ export default function App() {
   const [isLogging, setIsLogging] = useState(true);
   const lastLoggedPointRef = useRef(null);
   const watchIdRef = useRef(null);
+
+  // Core logging save function
+  const logSignalReading = useCallback(async (lat, lng, accuracy, speed) => {
+    const conn = getConnectionDetails();
+    const quality = mapConnectionToQuality(conn);
+
+    const newReading = {
+      lat,
+      lng,
+      accuracy,
+      speed,
+      effective_type: conn.effectiveType,
+      downlink: conn.downlink,
+      rtt: conn.rtt,
+      quality,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      const { error } = await supabase.from('signal_readings').insert([newReading]);
+      if (error) {
+        console.error('Error inserting reading to Supabase:', error);
+      } else {
+        setSessionReadingsCount((count) => count + 1);
+      }
+    } catch (error) {
+      console.error('Database insertion error:', error);
+    }
+  }, []);
 
   // 1. Initial Permission API Query
   useEffect(() => {
@@ -158,7 +189,7 @@ export default function App() {
 
   // 4. Geolocation Position Watcher Logic
   useEffect(() => {
-    if (hasPermission && isLogging) {
+    if (hasStarted && hasPermission && isLogging) {
       console.log('🔌 Geolocation tracking enabled');
 
       if (watchIdRef.current) {
@@ -175,9 +206,9 @@ export default function App() {
           setCurrentSpeed(speed);
 
           // Filtering Rules:
-          // A: Skip if GPS accuracy is worse than 50 meters
-          if (accuracy > 50) {
-            console.warn(`[Logger] Skip: Accuracy poor (${accuracy.toFixed(1)}m > 50m)`);
+          // A: Skip if GPS accuracy is worse than 200 meters
+          if (accuracy > 200) {
+            console.warn(`[Logger] Skip: Accuracy poor (${accuracy.toFixed(1)}m > 200m)`);
             return;
           }
 
@@ -230,36 +261,7 @@ export default function App() {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
-  }, [hasPermission, isLogging]);
-
-  // Core logging save function
-  const logSignalReading = async (lat, lng, accuracy, speed) => {
-    const conn = getConnectionDetails();
-    const quality = mapConnectionToQuality(conn);
-
-    const newReading = {
-      lat,
-      lng,
-      accuracy,
-      speed,
-      effective_type: conn.effectiveType,
-      downlink: conn.downlink,
-      rtt: conn.rtt,
-      quality,
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      const { data, error } = await supabase.from('signal_readings').insert([newReading]);
-      if (error) {
-        console.error('Error inserting reading to Supabase:', error);
-      } else {
-        setSessionReadingsCount((count) => count + 1);
-      }
-    } catch (e) {
-      console.error('Database insertion error:', e);
-    }
-  };
+  }, [hasStarted, hasPermission, isLogging, logSignalReading]);
 
   const handleToggleLogging = () => {
     setIsLogging((prev) => {
@@ -276,6 +278,10 @@ export default function App() {
     setSelectedLocation(latlng);
     // Open drawer sheet on map, or let user switch tabs
   };
+
+  if (!hasStarted) {
+    return <LandingScreen onStart={() => setHasStarted(true)} />;
+  }
 
   // If location permission has not been granted yet, show the onboarding screen
   if (!hasPermission) {

@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Compass, ShieldAlert, Wifi, Navigation } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 
 const QUALITY_COLORS = {
   excellent: '#10B981', // Emerald Green
@@ -9,6 +9,16 @@ const QUALITY_COLORS = {
   moderate: '#F59E0B',  // Amber Yellow
   weak: '#EF4444',      // Orange-Red
   dead: '#991B1B',      // Crimson/Dark Red
+};
+
+const refreshMapLayout = (map) => {
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
+
+  window.setTimeout(() => {
+    map.invalidateSize();
+  }, 150);
 };
 
 export default function MapScreen({
@@ -25,13 +35,18 @@ export default function MapScreen({
   const markersGroupRef = useRef(null);
   const userMarkerRef = useRef(null);
   const selectionCircleRef = useRef(null);
+  const hasCenteredOnUserRef = useRef(false);
+  const selectLocationRef = useRef(onSelectLocation);
+  const userLat = userLocation?.lat;
+  const userLng = userLocation?.lng;
+
+  useEffect(() => {
+    selectLocationRef.current = onSelectLocation;
+  }, [onSelectLocation]);
 
   // 1. Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
-
-    const initialLat = userLocation?.lat || 0;
-    const initialLng = userLocation?.lng || 0;
 
     // Initialize map
     const map = L.map(mapContainerRef.current, {
@@ -39,7 +54,7 @@ export default function MapScreen({
       attributionControl: true,
       maxZoom: 18,
       minZoom: 3,
-    }).setView([initialLat, initialLng], 16);
+    }).setView([0, 0], 16);
 
     // Dark Theme Tiles - CartoDB Dark Matter
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -60,26 +75,41 @@ export default function MapScreen({
     mapRef.current = map;
 
     // Tap/Click handler on map
-    map.on('click', (e) => {
+    const handleMapClick = (e) => {
       const { lat, lng } = e.latlng;
-      onSelectLocation({ lat, lng });
+      selectLocationRef.current({ lat, lng });
+    };
+
+    map.on('click', handleMapClick);
+    refreshMapLayout(map);
+
+    const resizeObserver = new ResizeObserver(() => {
+      refreshMapLayout(map);
     });
+    resizeObserver.observe(mapContainerRef.current);
 
     // Cleanup map on unmount
     return () => {
+      resizeObserver.disconnect();
+      map.off('click', handleMapClick);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      markersGroupRef.current = null;
+      userMarkerRef.current = null;
+      selectionCircleRef.current = null;
+      hasCenteredOnUserRef.current = false;
     };
   }, []);
 
-  // 2. Center map on user location if coordinates change initially (or on recenter)
+  // 2. Center map once on the first GPS fix. Later updates only move the marker.
   useEffect(() => {
-    if (mapRef.current && userLocation && !selectedLocation) {
-      mapRef.current.setView([userLocation.lat, userLocation.lng]);
+    if (mapRef.current && userLat != null && userLng != null && !hasCenteredOnUserRef.current) {
+      mapRef.current.setView([userLat, userLng], 16);
+      hasCenteredOnUserRef.current = true;
     }
-  }, [userLocation?.lat, userLocation?.lng]);
+  }, [userLat, userLng]);
 
   // 3. Render Signal readings on Map
   useEffect(() => {
@@ -100,7 +130,6 @@ export default function MapScreen({
 
       // Add descriptive popup
       const dateStr = new Date(reading.timestamp).toLocaleTimeString();
-      const speedStr = reading.speed ? `${(reading.speed * 3.6).toFixed(1)} km/h` : 'N/A';
       const downlinkStr = reading.downlink ? `${reading.downlink} Mbps` : 'N/A';
       
       circleMarker.bindPopup(`
@@ -128,9 +157,9 @@ export default function MapScreen({
 
   // 4. Track User Location Marker
   useEffect(() => {
-    if (!mapRef.current || !userLocation) return;
+    if (!mapRef.current || userLat == null || userLng == null) return;
 
-    const latlng = [userLocation.lat, userLocation.lng];
+    const latlng = [userLat, userLng];
 
     if (userMarkerRef.current) {
       userMarkerRef.current.setLatLng(latlng);
@@ -145,7 +174,7 @@ export default function MapScreen({
 
       userMarkerRef.current = L.marker(latlng, { icon: userMarkerIcon }).addTo(mapRef.current);
     }
-  }, [userLocation?.lat, userLocation?.lng]);
+  }, [userLat, userLng]);
 
   // 5. Track Tapped Selected Coordinates (Area Report Center)
   useEffect(() => {
