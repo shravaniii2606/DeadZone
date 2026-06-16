@@ -289,7 +289,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="relative flex h-dvh w-screen flex-col overflow-hidden bg-slate-950 text-slate-100 font-sans">
       {/* Demo Warning Banner if using mock database */}
       {isMockDatabase && (
         <div className="absolute top-0 left-0 right-0 z-50 bg-amber-500/10 border-b border-amber-500/20 backdrop-blur-md py-1.5 px-4 text-center flex items-center justify-center gap-2">
@@ -301,7 +301,7 @@ export default function App() {
       )}
 
       {/* Screen Container */}
-      <div className="flex-1 w-full relative overflow-hidden">
+      <div className="relative min-h-0 w-full flex-1 overflow-hidden">
         {activeTab === 'map' && (
           <div className="w-full h-full relative">
             <MapScreen
@@ -348,7 +348,7 @@ export default function App() {
       </div>
 
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 glass-panel border-t border-slate-900 flex items-center justify-around py-3 px-2 shadow-2xl">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 glass-panel flex items-center justify-around border-t border-slate-900 px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl">
         <button
           onClick={() => setActiveTab('map')}
           className={`flex flex-col items-center gap-1 transition-all duration-200 ${

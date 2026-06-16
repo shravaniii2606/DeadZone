@@ -214,7 +214,7 @@ export default function MapScreen({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col">
+    <div className="relative flex h-full min-h-0 w-full flex-col">
       {/* Leaflet container */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
@@ -237,7 +237,7 @@ export default function MapScreen({
       {userLocation && (
         <button
           onClick={handleRecenter}
-          className="absolute right-4 bottom-20 z-10 p-3.5 rounded-full bg-slate-900/90 border border-slate-800 text-sky-400 hover:text-sky-300 shadow-xl shadow-black/40 hover:bg-slate-800/90 active:scale-95 transition-all duration-150"
+          className="absolute right-4 bottom-[calc(9.5rem+env(safe-area-inset-bottom))] z-10 rounded-full border border-slate-800 bg-slate-900/90 p-3.5 text-sky-400 shadow-xl shadow-black/40 transition-all duration-150 hover:bg-slate-800/90 hover:text-sky-300 active:scale-95"
           title="Recenter Map"
         >
           <Navigation className="w-5 h-5 fill-current" />
@@ -245,7 +245,7 @@ export default function MapScreen({
       )}
 
       {/* Bottom Status Bar */}
-      <div className="absolute left-4 right-4 bottom-4 z-10 glass-panel py-3 px-4 rounded-xl flex items-center justify-between shadow-xl shadow-black/30 pointer-events-auto">
+      <div className="absolute left-4 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10 glass-panel pointer-events-auto flex items-center justify-between rounded-xl px-4 py-3 shadow-xl shadow-black/30">
         <div className="flex items-center gap-2">
           {isLogging ? (
             <>

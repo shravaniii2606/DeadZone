@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { getHaversineDistance } from '../utils/haversine';
 import { X, MapPin, AlertOctagon, ShieldAlert, Signal, Activity, TrendingUp } from 'lucide-react';
 
@@ -150,7 +150,7 @@ export default function AreaReport({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4 space-y-5 pr-1">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto py-4 pr-1">
         {/* Lat Lng display */}
         <div className="text-xs text-slate-500 font-mono bg-slate-900/60 p-2.5 rounded-xl border border-slate-900 flex justify-between shrink-0">
           <span>LAT: {selectedLocation.lat.toFixed(6)}</span>
@@ -227,7 +227,7 @@ export default function AreaReport({
   // If rendering inside the map as a slide-up drawer
   if (isDrawer) {
     return (
-      <div className="absolute left-4 right-4 bottom-20 z-20 glass-panel-heavy p-5 rounded-2xl shadow-2xl shadow-black/80 max-h-[70%] flex flex-col animate-[slideUp_0.3s_ease-out]">
+      <div className="absolute left-4 right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-20 glass-panel-heavy flex max-h-[70%] flex-col rounded-2xl p-5 shadow-2xl shadow-black/80 animate-[slideUp_0.3s_ease-out]">
         {content}
       </div>
     );
@@ -235,7 +235,7 @@ export default function AreaReport({
 
   // Otherwise, render as full screen page in tab layout
   return (
-    <div className="relative h-full w-full bg-slate-950 text-slate-100 flex flex-col p-5 pb-24">
+    <div className="relative flex h-full min-h-0 w-full flex-col bg-slate-950 p-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))] text-slate-100">
       {content}
     </div>
   );

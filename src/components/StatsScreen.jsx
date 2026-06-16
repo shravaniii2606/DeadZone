@@ -1,5 +1,4 @@
-import React from 'react';
-import { Play, Square, Wifi, Compass, Navigation, Radio, Info } from 'lucide-react';
+import { Play, Square, Radio, Info } from 'lucide-react';
 
 const QUALITY_STYLES = {
   excellent: {
@@ -62,7 +61,7 @@ export default function StatsScreen({
   const speedKmh = currentSpeed ? (currentSpeed * 3.6).toFixed(1) : '0.0';
 
   return (
-    <div className="relative h-full w-full bg-slate-950 text-slate-100 flex flex-col p-5 pb-28 overflow-y-auto">
+    <div className="relative flex h-full min-h-0 w-full flex-col overflow-y-auto bg-slate-950 p-5 pb-[calc(7rem+env(safe-area-inset-bottom))] text-slate-100">
       {/* Glow Backdrops */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-slate-900 rounded-full blur-[80px] pointer-events-none"></div>
 
@@ -133,7 +132,7 @@ export default function StatsScreen({
       </div>
 
       {/* Analytics Telemetry Cards Grid */}
-      <div className="grid grid-cols-2 gap-4 w-full max-w-md mx-auto z-10">
+      <div className="z-10 mx-auto grid w-full max-w-md grid-cols-1 gap-4 min-[380px]:grid-cols-2">
         <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Session Contribution</span>
           <div className="mt-2 flex items-baseline gap-1">

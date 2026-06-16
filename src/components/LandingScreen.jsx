@@ -3,7 +3,7 @@ import heroImage from '../assets/hero.png';
 
 export default function LandingScreen({ onStart }) {
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-slate-950 text-slate-100">
+    <main className="relative min-h-dvh w-full overflow-hidden bg-slate-950 text-slate-100">
       <img
         src={heroImage}
         alt=""
@@ -12,7 +12,7 @@ export default function LandingScreen({ onStart }) {
       <div className="absolute inset-0 bg-slate-950/55" />
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent" />
 
-      <section className="relative z-10 flex min-h-screen flex-col justify-between px-6 py-8">
+      <section className="relative z-10 flex min-h-dvh flex-col justify-between px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-emerald-400/20 bg-slate-950/70 text-emerald-300 shadow-lg shadow-black/30">
             <Radio className="h-6 w-6" />

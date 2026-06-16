@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MapPin, Shield, Radio, Activity, AlertTriangle } from 'lucide-react';
 
 export default function PermissionScreen({ onRequestPermission }) {
@@ -10,7 +10,7 @@ export default function PermissionScreen({ onRequestPermission }) {
     setError(null);
     try {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        () => {
           setLoading(false);
           onRequestPermission(true);
         },
@@ -29,14 +29,14 @@ export default function PermissionScreen({ onRequestPermission }) {
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
-    } catch (e) {
+    } catch {
       setLoading(false);
       setError('An unexpected error occurred while requesting permission.');
     }
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-between min-h-screen w-full bg-slate-950 text-slate-100 p-6 overflow-y-auto">
+    <div className="relative flex min-h-dvh w-full flex-col items-center justify-between overflow-y-auto bg-slate-950 p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-slate-100">
       {/* Background Neon Glows */}
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-red-500/10 rounded-full blur-[100px] pointer-events-none"></div>
