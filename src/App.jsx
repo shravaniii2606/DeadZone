@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { Map, BarChart3, FileText, ShieldAlert } from 'lucide-react';
+import { Map, BarChart3, FileText, Route, ShieldAlert } from 'lucide-react';
 
 // Components
 import PermissionScreen from './components/PermissionScreen';
@@ -7,6 +7,7 @@ import LandingScreen from './components/LandingScreen';
 import MapScreen from './components/MapScreen';
 import StatsScreen from './components/StatsScreen';
 import AreaReport from './components/AreaReport';
+import RouteRecommender from './components/RouteRecommender';
 
 // Utilities
 import { supabase, isMockDatabase } from './utils/supabaseClient';
@@ -51,7 +52,7 @@ export default function App() {
   // Navigation & Permission state
   const [hasStarted, setHasStarted] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
-  const [activeTab, setActiveTab] = useState('map'); // 'map', 'stats', 'report'
+  const [activeTab, setActiveTab] = useState('map'); // 'map', 'stats', 'report', 'route'
 
   // Logged readings
   const [readings, setReadings] = useState([]);
@@ -345,6 +346,10 @@ export default function App() {
             isDrawer={false}
           />
         )}
+
+        {activeTab === 'route' && (
+          <RouteRecommender />
+        )}
       </div>
 
       {/* Bottom Navigation Bar */}
@@ -377,6 +382,16 @@ export default function App() {
         >
           <FileText className="w-5.5 h-5.5" />
           <span className="text-[10px] tracking-wide uppercase">Report</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('route')}
+          className={`flex flex-col items-center gap-1 transition-all duration-200 ${
+            activeTab === 'route' ? 'text-cyan-400 scale-105 font-bold' : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <Route className="w-5.5 h-5.5" />
+          <span className="text-[10px] tracking-wide uppercase">Route</span>
         </button>
       </nav>
     </div>
